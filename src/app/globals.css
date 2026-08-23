@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --shadow-card: 0 1px 2px rgba(23, 27, 36, 0.05), 0 10px 28px -12px rgba(23, 27, 36, 0.2);
+}
+
+html {
+    background: #f5f6f9;
+}
+
+body {
+    color: #171b24;
+}
+
+.card {
+    background: #ffffff;
+    border: 1px solid #dfe3ec;
+    border-radius: 12px;
+    box-shadow: var(--shadow-card);
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+}
+.badge-good { background: #e4f5ec; color: #1f7a4d; border: 1px solid #bfe4d0; }
+.badge-amber { background: #fbf0dd; color: #a8631a; border: 1px solid #ead3a3; }
+.badge-accent { background: #e8edfa; color: #1e3564; border: 1px solid #c9d6f2; }
+.badge-danger { background: #fce8e6; color: #b3261e; border: 1px solid #f0c3bf; }
+.badge-neutral { background: #eef1f6; color: #4b5468; border: 1px solid #eaedf3; }
