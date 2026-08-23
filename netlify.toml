@@ -1,0 +1,5 @@
+[build]
+  command = "tar xzf kenalan-app.tar.gz && npm install && npm run build"
+
+  [[plugins]]
+    package = "@netlify/plugin-nextjs"
