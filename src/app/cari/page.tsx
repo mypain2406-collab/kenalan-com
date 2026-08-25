@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import { CATEGORIES, store } from "@/lib/db";
+import { store } from "@/lib/db";
 import { Stars, VerificationBadges } from "@/components/VerificationBadges";
 import { TrustPill } from "@/components/VerificationBadges";
 
@@ -8,15 +8,17 @@ export const dynamic = "force-dynamic";
 
 export default async function CariPage({
   searchParams,
-  }: {
-    searchParams: { kategori?: string; lokasi?: string };
-    }) {
-      const kategori = searchParams.kategori || CATEGORIES[1];
-        const lokasi = searchParams.lokasi || "Kemang, Jakarta Selatan";
-          const results = await store.listProfiles({ category: kategori });
-            const resultUsers = Object.fromEntries(
-                await Promise.all(results.map(async (p) => [p.userId, await store.getUserById(p.userId)] as const))
-                  );
+}: {
+  searchParams: { kategori?: string; lokasi?: string };
+}) {
+  const categoryRecords = await store.listCategories();
+  const CATEGORIES = categoryRecords.map((c) => c.name);
+  const kategori = searchParams.kategori || CATEGORIES[1] || CATEGORIES[0];
+  const lokasi = searchParams.lokasi || "Kemang, Jakarta Selatan";
+  const results = await store.listProfiles({ category: kategori });
+  const resultUsers = Object.fromEntries(
+    await Promise.all(results.map(async (p) => [p.userId, await store.getUserById(p.userId)] as const))
+  );
 
                     return (
                         <main>
