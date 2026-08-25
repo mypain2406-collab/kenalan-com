@@ -1,16 +1,17 @@
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import { CATEGORIES, store } from "@/lib/db";
+import { store } from "@/lib/db";
 import { Stars, VerificationBadges } from "@/components/VerificationBadges";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const allProfiles = await store.listProfiles();
-    const featured = allProfiles.filter((p) => p.status === "aktif").slice(0, 4);
-      const featuredUsers = Object.fromEntries(
-          await Promise.all(featured.map(async (p) => [p.userId, await store.getUserById(p.userId)] as const))
-            );
+  const [allProfiles, categoryRecords] = await Promise.all([store.listProfiles(), store.listCategories()]);
+  const CATEGORIES = categoryRecords.map((c) => c.name);
+  const featured = allProfiles.filter((p) => p.status === "aktif").slice(0, 4);
+  const featuredUsers = Object.fromEntries(
+    await Promise.all(featured.map(async (p) => [p.userId, await store.getUserById(p.userId)] as const))
+  );
 
               return (
                   <main>
