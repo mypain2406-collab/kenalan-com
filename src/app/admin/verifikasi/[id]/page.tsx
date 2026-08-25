@@ -1,82 +1,74 @@
 import { notFound, redirect } from "next/navigation";
-import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { store } from "@/lib/db";
 import DecisionForm from "@/components/DecisionForm";
+import AdminSidebar from "@/components/AdminSidebar";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminVerifikasiDetailPage({ params }: { params: { id: string } }) {
   const session = getSession();
-    if (!session) redirect("/masuk?next=/admin/verifikasi");
-      if (session.role !== "admin") redirect("/");
+  if (!session) redirect("/masuk?next=/admin/verifikasi");
+  if (session.role !== "admin") redirect("/");
 
-        const verification = await store.getVerification(params.id);
-          if (!verification) return notFound();
-            const applicant = await store.getUserById(verification.userId);
-              const profile = await store.getProfileByUser(verification.userId);
+  const verification = await store.getVerification(params.id);
+  if (!verification) return notFound();
+  const applicant = await store.getUserById(verification.userId);
+  const profile = await store.getProfileByUser(verification.userId);
+  const queue = await store.listPendingVerifications();
 
-                return (
-                    <div className="flex min-h-screen">
-                          <aside className="w-[232px] shrink-0 bg-ink text-[#C7CCDA] p-5 flex flex-col gap-1">
-                                  <div className="flex items-center gap-2.5 px-2.5 pb-5">
-                                            <span className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center">
-                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="8" r="3.4" stroke="white" strokeWidth="1.7" /><circle cx="16.5" cy="9.5" r="2.6" stroke="white" strokeWidth="1.7" /></svg>
-                                                                  </span>
-                                                                            <span className="text-white font-display font-extrabold text-sm">Trust &amp; Safety</span>
-                                                                                    </div>
-                                                                                            <Link href="/admin/verifikasi" className="px-2.5 py-2 rounded-lg bg-white/10 text-white font-semibold text-sm">← Antrean Verifikasi</Link>
-                                                                                                  </aside>
+  return (
+    <div className="flex min-h-screen">
+      <AdminSidebar active="verifikasi" badgeCount={queue.length} />
 
-                                                                                                        <div className="flex-1 p-8 max-w-2xl">
-                                                                                                                <div className="text-xs text-inkfaint mb-1">Pengajuan {verification.jenis} · {verification.id}</div>
-                                                                                                                        <h1 className="font-display font-bold text-xl mb-6">{applicant?.name}</h1>
-                                                                                                                        
-                                                                                                                                <div className="card p-6">
-                                                                                                                                          <div className="grid grid-cols-2 gap-2.5 mb-4">
-                                                                                                                                                      <div className="h-24 rounded-lg bg-gradient-to-br from-accent to-[#5A75AA] relative">
-                                                                                                                                                                    <span className="absolute top-2 left-2.5 text-[10px] text-white/85 font-mono tracking-wide bg-black/25 px-1.5 py-0.5 rounded">FOTO KTP</span>
-                                                                                                                                                                                </div>
-                                                                                                                                                                                            <div className="h-24 rounded-lg bg-gradient-to-br from-[#EAD3A3] to-[#D9AE6E] relative">
-                                                                                                                                                                                                          <span className="absolute top-2 left-2.5 text-[10px] text-white/85 font-mono tracking-wide bg-black/25 px-1.5 py-0.5 rounded">SELFIE LIVENESS</span>
-                                                                                                                                                                                                                      </div>
-                                                                                                                                                                                                                                </div>
-                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                          {typeof verification.faceMatchScore === "number" && (
-                                                                                                                                                                                                                                                      <div className="flex items-center justify-between bg-goodsoft border border-[#BFE4D0] rounded-lg px-3.5 py-2.5 mb-4">
-                                                                                                                                                                                                                                                                    <span className="text-sm text-good">Skor kecocokan wajah</span>
-                                                                                                                                                                                                                                                                                  <b className="font-mono text-good text-lg">{verification.faceMatchScore}%</b>
-                                                                                                                                                                                                                                                                                              </div>
-                                                                                                                                                                                                                                                                                                        )}
-                                                                                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                                  <div className="flex justify-between text-sm py-2 border-b border-bordersoft">
-                                                                                                                                                                                                                                                                                                                              <span className="text-inkfaint">Nama (KTP)</span>
-                                                                                                                                                                                                                                                                                                                                          <span className="font-mono">{applicant?.name.toUpperCase()}</span>
-                                                                                                                                                                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                                                                                                                                                                              <div className="flex justify-between text-sm py-2 border-b border-bordersoft">
-                                                                                                                                                                                                                                                                                                                                                                          <span className="text-inkfaint">Kategori jasa</span>
-                                                                                                                                                                                                                                                                                                                                                                                      <span>{profile?.category}</span>
-                                                                                                                                                                                                                                                                                                                                                                                                </div>
-                                                                                                                                                                                                                                                                                                                                                                                                          <div className="flex justify-between text-sm py-2">
-                                                                                                                                                                                                                                                                                                                                                                                                                      <span className="text-inkfaint">Deteksi dokumen</span>
-                                                                                                                                                                                                                                                                                                                                                                                                                                  <span className={verification.documentAuthentic === false ? "text-warn" : "text-good"}>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                {verification.documentAuthentic === false ? "Perlu tinjauan manual" : "Asli"}
-                                                                                                                                                                                                                                                                                                                                                                                                                                                            </span>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                      </div>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                {verification.riskFlag && (
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <div className="flex gap-2.5 bg-dangersoft border border-[#F0C3BF] rounded-lg p-3.5 text-sm text-danger mt-4 leading-relaxed">
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="shrink-0 mt-0.5"><path d="M12 8v5M12 16.5h.01" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" /></svg>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        {verification.riskFlag}
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              )}
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <div className="mt-5">
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    <DecisionForm verificationId={verification.id} defaultNote={verification.reviewerNote ?? ""} />
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              </div>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      </div>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            </div>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </div>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  );
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+      <div className="flex-1 p-8 max-w-2xl">
+        <div className="text-xs text-inkfaint mb-1">Pengajuan {verification.jenis} · {verification.id}</div>
+        <h1 className="font-display font-bold text-xl mb-6">{applicant?.name}</h1>
+
+        <div className="card p-6">
+          <div className="grid grid-cols-2 gap-2.5 mb-4">
+            <div className="h-24 rounded-lg bg-gradient-to-br from-accent to-[#5A75AA] relative">
+              <span className="absolute top-2 left-2.5 text-[10px] text-white/85 font-mono tracking-wide bg-black/25 px-1.5 py-0.5 rounded">FOTO KTP</span>
+            </div>
+            <div className="h-24 rounded-lg bg-gradient-to-br from-[#EAD3A3] to-[#D9AE6E] relative">
+              <span className="absolute top-2 left-2.5 text-[10px] text-white/85 font-mono tracking-wide bg-black/25 px-1.5 py-0.5 rounded">SELFIE LIVENESS</span>
+            </div>
+          </div>
+
+          {typeof verification.faceMatchScore === "number" && (
+            <div className="flex items-center justify-between bg-goodsoft border border-[#BFE4D0] rounded-lg px-3.5 py-2.5 mb-4">
+              <span className="text-sm text-good">Skor kecocokan wajah</span>
+              <b className="font-mono text-good text-lg">{verification.faceMatchScore}%</b>
+            </div>
+          )}
+
+          <div className="flex justify-between text-sm py-2 border-b border-bordersoft">
+            <span className="text-inkfaint">Nama (KTP)</span>
+            <span className="font-mono">{applicant?.name.toUpperCase()}</span>
+          </div>
+          <div className="flex justify-between text-sm py-2 border-b border-bordersoft">
+            <span className="text-inkfaint">Kategori jasa</span>
+            <span>{profile?.category}</span>
+          </div>
+          <div className="flex justify-between text-sm py-2">
+            <span className="text-inkfaint">Deteksi dokumen</span>
+            <span className={verification.documentAuthentic === false ? "text-warn" : "text-good"}>
+              {verification.documentAuthentic === false ? "Perlu tinjauan manual" : "Asli"}
+            </span>
+          </div>
+
+          {verification.riskFlag && (
+            <div className="flex gap-2.5 bg-dangersoft border border-[#F0C3BF] rounded-lg p-3.5 text-sm text-danger mt-4 leading-relaxed">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="shrink-0 mt-0.5"><path d="M12 8v5M12 16.5h.01" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" /></svg>
+              {verification.riskFlag}
+            </div>
+          )}
+
+          <div className="mt-5">
+            <DecisionForm verificationId={verification.id} defaultNote={verification.reviewerNote ?? ""} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
